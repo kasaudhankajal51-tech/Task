@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { TaskProvider, useTasks } from './context/TaskContext';
 import Navbar from './components/Navbar';
 import StatsOverview from './components/StatsOverview';
@@ -8,8 +9,9 @@ import TaskList from './components/TaskList';
 import TaskModal from './components/TaskModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
+import AuthModal from './components/AuthModal';
 import Toast from './components/Toast';
-import { Sparkles, Calendar as CalendarIcon, Zap } from 'lucide-react';
+import { Sparkles, Calendar as CalendarIcon, ShieldCheck } from 'lucide-react';
 
 const DashboardContent = () => {
   const {
@@ -23,6 +25,8 @@ const DashboardContent = () => {
     isDeleteModalOpen,
     isShortcutsOpen,
   } = useTasks();
+
+  const { user, isAuthenticated, openAuthModal } = useAuth();
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -104,12 +108,33 @@ const DashboardContent = () => {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         
+        {/* Unauthenticated Alert Banner */}
+        {!isAuthenticated && (
+          <div className="mb-6 p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Private Multi-User Mode Active</h3>
+                <p className="text-xs text-slate-400">Sign in to sync and isolate your personal tasks across phone and web.</p>
+              </div>
+            </div>
+            <button
+              onClick={openAuthModal}
+              className="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-extrabold shadow-md transition-all self-start sm:self-auto"
+            >
+              Sign In / Create Account
+            </button>
+          </div>
+        )}
+
         {/* Welcome & Live Date Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
-                <span>TaskFlow Workspace</span>
+                <span>{isAuthenticated ? `Welcome back, ${user?.name?.split(' ')[0]}` : 'TaskFlow Workspace'}</span>
                 <Sparkles className="w-5 h-5 text-teal-400 shrink-0" />
               </h1>
             </div>
@@ -140,6 +165,7 @@ const DashboardContent = () => {
       <TaskModal />
       <DeleteConfirmModal />
       <KeyboardShortcutsModal />
+      <AuthModal />
       <Toast />
     </div>
   );
@@ -147,8 +173,10 @@ const DashboardContent = () => {
 
 export default function App() {
   return (
-    <TaskProvider>
-      <DashboardContent />
-    </TaskProvider>
+    <AuthProvider>
+      <TaskProvider>
+        <DashboardContent />
+      </TaskProvider>
+    </AuthProvider>
   );
 }

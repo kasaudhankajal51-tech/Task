@@ -8,9 +8,12 @@ import {
   List,
   Download,
   HelpCircle,
-  Palette,
+  LogIn,
+  LogOut,
+  User as UserIcon,
 } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
+import { useAuth } from '../context/AuthContext';
 
 export const Navbar = () => {
   const {
@@ -20,11 +23,18 @@ export const Navbar = () => {
     setViewMode,
     exportTasks,
     openShortcutsModal,
-    accentTheme,
-    setAccentTheme,
   } = useTasks();
 
+  const { user, isAuthenticated, openAuthModal, logout } = useAuth();
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
 
   return (
     <header className="sticky top-0 z-30 w-full glass-panel border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
@@ -92,7 +102,7 @@ export const Navbar = () => {
           </button>
         </div>
 
-        {/* Right: Actions */}
+        {/* Right: Actions & User Auth */}
         <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Export Dropdown */}
@@ -107,7 +117,7 @@ export const Navbar = () => {
 
             {showExportMenu && (
               <div
-                className="absolute right-0 mt-2 w-40 glass-panel bg-slate-900/95 border border-slate-700/80 rounded-2xl p-1.5 shadow-xl z-50 animate-slide-up"
+                className="absolute right-0 mt-2 w-40 glass-panel bg-slate-900/95 border border-slate-700/80 rounded-2xl p-1.5 shadow-xl z-50"
                 onMouseLeave={() => setShowExportMenu(false)}
               >
                 <button
@@ -148,7 +158,6 @@ export const Navbar = () => {
                 ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/20'
                 : 'bg-rose-950/40 text-rose-300 border-rose-500/20'
             }`}
-            title={backendConnected ? 'Backend Connected' : 'Cannot connect to backend on :5000'}
           >
             <span
               className={`w-2 h-2 rounded-full ${
@@ -158,6 +167,56 @@ export const Navbar = () => {
             <Server className="w-3.5 h-3.5 opacity-70" />
             <span>{backendConnected ? 'Atlas Live' : 'Offline'}</span>
           </div>
+
+          {/* User Auth Profile / Login Button */}
+          {isAuthenticated && user ? (
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 p-1 pl-2 pr-3 rounded-2xl bg-slate-900 border border-slate-700/80 hover:border-teal-500/50 transition-colors"
+              >
+                <div
+                  className="w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs text-slate-950 shadow-md"
+                  style={{ backgroundColor: user.avatarColor || '#14b8a6' }}
+                >
+                  {getInitials(user.name)}
+                </div>
+                <span className="text-xs font-bold text-slate-200 max-w-[90px] truncate hidden sm:inline">
+                  {user.name}
+                </span>
+              </button>
+
+              {showUserMenu && (
+                <div
+                  className="absolute right-0 mt-2 w-48 glass-panel bg-slate-900/95 border border-slate-700/80 rounded-2xl p-2 shadow-2xl z-50"
+                  onMouseLeave={() => setShowUserMenu(false)}
+                >
+                  <div className="px-3 py-2 border-b border-slate-800 mb-1">
+                    <p className="text-xs font-bold text-white truncate">{user.name}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={openAuthModal}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-teal-400 border border-teal-500/30 text-xs font-bold transition-all"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+          )}
 
           {/* Add New Task Button */}
           <button
