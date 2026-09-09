@@ -14,10 +14,14 @@ import { useTasks } from '../context/TaskContext';
 import taskApi, { DEFAULT_API_URL } from '../api/taskApi';
 
 export const ServerConfigModal = ({ isOpen, onClose }) => {
-  const { isServerModalOpen, closeServerModal, apiUrl, updateApiUrl } = useTasks();
+  const taskCtx = useTasks();
+  const isServerModalOpen = taskCtx?.isServerModalOpen;
+  const closeServerModal = taskCtx?.closeServerModal;
+  const apiUrl = taskCtx?.apiUrl || getStoredApiUrl();
+  const updateApiUrl = taskCtx?.updateApiUrl || setStoredApiUrl;
   
-  const modalVisible = isOpen !== undefined ? isOpen : isServerModalOpen;
-  const handleClose = onClose || closeServerModal;
+  const modalVisible = isOpen !== undefined ? isOpen : !!isServerModalOpen;
+  const handleClose = onClose || closeServerModal || (() => {});
 
   const [inputUrl, setInputUrl] = useState(apiUrl);
   const [testing, setTesting] = useState(false);

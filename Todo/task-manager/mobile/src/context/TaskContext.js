@@ -7,10 +7,7 @@ const TaskContext = createContext();
 
 export const useTasks = () => {
   const ctx = useContext(TaskContext);
-  if (!ctx) {
-    throw new Error('useTasks must be used within a TaskProvider');
-  }
-  return ctx;
+  return ctx || {};
 };
 
 export const TaskProvider = ({ children }) => {
