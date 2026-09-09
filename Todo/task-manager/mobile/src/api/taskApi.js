@@ -126,10 +126,15 @@ export const taskApi = {
   // Test connection to any given URL
   testConnection: async (urlToTest) => {
     try {
-      const url = urlToTest ? `${urlToTest.replace(/\/+$/, '')}/` : `${currentBaseUrl}/`;
-      const res = await axios.get(url, { timeout: 4000 });
-      return res.status === 200;
+      const baseUrl = urlToTest ? urlToTest.replace(/\/+$/, '') : currentBaseUrl.replace(/\/+$/, '');
+      // Try root or /health with 10s timeout
+      const res = await axios.get(baseUrl, { timeout: 10000 });
+      return res.status < 400;
     } catch (e) {
+      if (e.response && e.response.status < 500) {
+        // Server responded (even with 401/404), meaning it is alive!
+        return true;
+      }
       return false;
     }
   },

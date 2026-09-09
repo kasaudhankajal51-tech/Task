@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 });
 
 // Health check / Base route
-app.get('/', (req, res) => {
+app.get(['/', '/api', '/api/health'], (req, res) => {
   res.json({
     status: 'online',
     message: 'TaskFlow Multi-User API is running',

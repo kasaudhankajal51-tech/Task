@@ -9,8 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
