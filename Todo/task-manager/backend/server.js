@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 
 // Load environment variables
@@ -16,17 +17,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  console.log(`📡 [${req.method}] ${req.url}`);
+  next();
+});
 
 // Health check / Base route
 app.get('/', (req, res) => {
   res.json({
     status: 'online',
-    message: 'Task Manager API is running',
+    message: 'TaskFlow Multi-User API is running',
+    version: '2.0.0',
     timestamp: new Date()
   });
 });
 
 // Mount Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
 // 404 Route Handler
@@ -49,6 +56,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 TaskFlow Server running on http://0.0.0.0:${PORT}`);
 });

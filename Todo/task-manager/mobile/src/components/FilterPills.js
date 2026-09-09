@@ -1,58 +1,108 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { useTasks } from '../context/TaskContext';
 
+const CATEGORIES = [
+  { id: 'all', label: 'All Categories', icon: 'layers' },
+  { id: 'Work', label: 'Work', icon: 'briefcase' },
+  { id: 'Personal', label: 'Personal', icon: 'user' },
+  { id: 'Urgent', label: 'Urgent', icon: 'zap' },
+  { id: 'Study', label: 'Study', icon: 'book-open' },
+  { id: 'Finance', label: 'Finance', icon: 'dollar-sign' },
+  { id: 'Health', label: 'Health', icon: 'heart' },
+];
+
 export const FilterPills = () => {
   const { filters, setFilters } = useTasks();
 
-  const statusOptions = [
-    { label: 'All', value: 'all' },
-    { label: 'To Do', value: 'pending' },
-    { label: 'In Progress', value: 'in-progress' },
-    { label: 'Completed', value: 'completed' },
-  ];
+  const handleCategorySelect = (catId) => {
+    setFilters((prev) => ({
+      ...prev,
+      category: prev.category === catId ? 'all' : catId,
+    }));
+  };
+
+  const handleSearchChange = (text) => {
+    setFilters((prev) => ({ ...prev, search: text }));
+  };
+
+  const clearSearch = () => {
+    setFilters((prev) => ({ ...prev, search: '' }));
+  };
 
   return (
     <View style={styles.container}>
-      {/* Search Input */}
-      <View style={styles.searchWrap}>
-        <Feather name="search" size={15} color={colors.textMuted} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search tasks..."
-          placeholderTextColor={colors.textMuted}
-          value={filters.search}
-          onChangeText={(text) => setFilters((prev) => ({ ...prev, search: text }))}
-        />
-        {filters.search ? (
-          <TouchableOpacity
-            onPress={() => setFilters((prev) => ({ ...prev, search: '' }))}
-            style={styles.clearBtn}
-          >
-            <Feather name="x" size={14} color={colors.textMuted} />
-          </TouchableOpacity>
-        ) : null}
+      {/* Search Input Bar */}
+      <View style={styles.searchRow}>
+        <View style={styles.searchWrapper}>
+          <Feather name="search" size={16} color={colors.textSecondary} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search your tasks or notes..."
+            placeholderTextColor={colors.textDisabled}
+            value={filters.search}
+            onChangeText={handleSearchChange}
+          />
+          {filters.search ? (
+            <TouchableOpacity onPress={clearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Feather name="x-circle" size={16} color={colors.textSecondary} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
-      {/* Filter Tabs */}
+      {/* Categories Horizontal Carousel */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.pillsScroll}
+        contentContainerStyle={styles.categoryScroll}
       >
-        {statusOptions.map((opt) => {
-          const isSelected = filters.status === opt.value;
+        {CATEGORIES.map((cat) => {
+          const isSelected = filters.category === cat.id;
+          const catConf = colors.categories[cat.id];
+
           return (
             <TouchableOpacity
-              key={opt.value}
-              style={[styles.pill, isSelected && styles.pillActive]}
-              onPress={() => setFilters((prev) => ({ ...prev, status: opt.value }))}
+              key={cat.id}
+              style={[
+                styles.categoryPill,
+                isSelected && styles.categoryPillSelected,
+                isSelected && catConf && {
+                  borderColor: catConf.color,
+                  backgroundColor: catConf.bg,
+                },
+              ]}
+              onPress={() => handleCategorySelect(cat.id)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.pillText, isSelected && styles.pillTextActive]}>
-                {opt.label}
+              <Feather
+                name={cat.icon}
+                size={12}
+                color={
+                  isSelected
+                    ? catConf
+                      ? catConf.color
+                      : colors.teal
+                    : colors.textSecondary
+                }
+              />
+              <Text
+                style={[
+                  styles.categoryText,
+                  isSelected && styles.categoryTextSelected,
+                  isSelected && catConf && { color: catConf.color },
+                ]}
+              >
+                {cat.label}
               </Text>
             </TouchableOpacity>
           );
@@ -64,55 +114,57 @@ export const FilterPills = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    marginBottom: 8,
+    marginVertical: 6,
+    gap: 8,
   },
-  searchWrap: {
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchWrapper: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 14,
     paddingHorizontal: 12,
-    height: 42,
-    marginBottom: 10,
-  },
-  searchIcon: {
-    marginRight: 8,
+    height: 44,
+    gap: 8,
   },
   searchInput: {
     flex: 1,
     color: colors.textPrimary,
     fontSize: 13,
-    paddingVertical: 0,
+    fontWeight: '500',
   },
-  clearBtn: {
-    padding: 4,
-  },
-  pillsScroll: {
+  categoryScroll: {
     gap: 8,
+    paddingVertical: 2,
   },
-  pill: {
-    paddingHorizontal: 14,
+  categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  pillActive: {
-    backgroundColor: 'rgba(20, 184, 166, 0.15)',
-    borderColor: 'rgba(20, 184, 166, 0.4)',
+  categoryPillSelected: {
+    borderColor: colors.teal,
+    backgroundColor: 'rgba(20, 184, 166, 0.12)',
   },
-  pillText: {
-    fontSize: 12,
-    fontWeight: '600',
+  categoryText: {
+    fontSize: 11,
+    fontWeight: '700',
     color: colors.textSecondary,
   },
-  pillTextActive: {
+  categoryTextSelected: {
     color: colors.teal,
-    fontWeight: '700',
   },
 });
 

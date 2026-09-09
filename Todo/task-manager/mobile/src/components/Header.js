@@ -2,30 +2,58 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
+import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 
 export const Header = () => {
-  const { backendConnected, openServerModal } = useTasks();
+  const { user } = useAuth();
+  const { backendConnected, openServerModal, openProfileModal } = useTasks();
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const firstName = user?.name ? user.name.split(' ')[0] : 'User';
 
   return (
     <View style={styles.container}>
-      {/* Brand Logo & Name */}
-      <View style={styles.brandContainer}>
-        <View style={styles.logoIcon}>
-          <Feather name="check-square" size={20} color={colors.teal} />
+      {/* Left: User Avatar & Greeting */}
+      <TouchableOpacity
+        style={styles.profileBtn}
+        onPress={openProfileModal}
+        activeOpacity={0.8}
+      >
+        <View
+          style={[
+            styles.avatarBadge,
+            { backgroundColor: user?.avatarColor || colors.teal },
+          ]}
+        >
+          <Text style={styles.avatarText}>{getInitials(user?.name)}</Text>
         </View>
-        <View>
-          <View style={styles.titleRow}>
-            <Text style={styles.title}>TaskFlow</Text>
-            <View style={styles.proBadge}>
-              <Text style={styles.proText}>PRO</Text>
-            </View>
-          </View>
-          <Text style={styles.subtitle}>Mobile Task Suite</Text>
-        </View>
-      </View>
 
-      {/* Right: Server Status & Settings */}
+        <View>
+          <View style={styles.greetingRow}>
+            <Text style={styles.greeting}>{getGreeting()},</Text>
+            <Text style={styles.userName}>{firstName} 👋</Text>
+          </View>
+          <Text style={styles.workspaceTag}>Personal Workspace</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Right: Live Connection & Settings */}
       <View style={styles.actions}>
         <TouchableOpacity
           style={[
@@ -33,6 +61,7 @@ export const Header = () => {
             backendConnected ? styles.statusPillConnected : styles.statusPillDisconnected,
           ]}
           onPress={openServerModal}
+          activeOpacity={0.7}
         >
           <View
             style={[
@@ -41,7 +70,7 @@ export const Header = () => {
             ]}
           />
           <Feather
-            name="server"
+            name="cloud"
             size={11}
             color={backendConnected ? colors.emerald : colors.rose}
           />
@@ -55,8 +84,12 @@ export const Header = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.settingsBtn} onPress={openServerModal}>
-          <Feather name="settings" size={16} color={colors.textSecondary} />
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          onPress={openProfileModal}
+          activeOpacity={0.7}
+        >
+          <Feather name="menu" size={18} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -74,49 +107,45 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  brandContainer: {
+  profileBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    flex: 1,
   },
-  logoIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(20, 184, 166, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(20, 184, 166, 0.25)',
+  avatarBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  titleRow: {
+  avatarText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#090d16',
+  },
+  greetingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
-  title: {
-    fontSize: 17,
+  greeting: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  userName: {
+    fontSize: 14,
     fontWeight: '800',
     color: colors.textPrimary,
-    letterSpacing: -0.3,
   },
-  proBadge: {
-    backgroundColor: 'rgba(20, 184, 166, 0.15)',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(20, 184, 166, 0.3)',
-  },
-  proText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: colors.teal,
-    letterSpacing: 0.5,
-  },
-  subtitle: {
+  workspaceTag: {
     fontSize: 10,
-    color: colors.textMuted,
+    color: colors.teal,
+    fontWeight: '700',
     marginTop: 1,
   },
   actions: {
@@ -129,7 +158,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 20,
     borderWidth: 1,
   },
@@ -163,9 +192,9 @@ const styles = StyleSheet.create({
     color: colors.rose,
   },
   settingsBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     backgroundColor: colors.surfaceLight,
     alignItems: 'center',
     justifyContent: 'center',

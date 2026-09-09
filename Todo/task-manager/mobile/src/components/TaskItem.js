@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { useTasks } from '../context/TaskContext';
 
@@ -8,10 +8,10 @@ export const TaskItem = ({ task }) => {
   const { toggleTaskComplete, openEditModal, openDeleteModal } = useTasks();
 
   const isCompleted = task.completed || task.status === 'completed';
-
   const priorityConf = colors.priority[task.priority] || colors.priority.medium;
+  const categoryConf = colors.categories[task.category] || colors.categories.Personal;
 
-  // Relative Date Calculator
+  // Relative Due Date Calculator
   const getDueInfo = () => {
     if (!task.dueDate) return null;
     const due = new Date(task.dueDate);
@@ -30,21 +30,96 @@ export const TaskItem = ({ task }) => {
     if (diffDays === 1) {
       return { text: 'Tomorrow', isUpcoming: true };
     }
-    return { text: `${due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` };
+    return {
+      text: due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    };
   };
 
   const dueInfo = getDueInfo();
 
   return (
     <View style={[styles.card, isCompleted && styles.cardCompleted]}>
-      {/* Top row: Checkbox, Title, Actions */}
-      <View style={styles.topRow}>
+      {/* Category Ribbon & Badges Header */}
+      <View style={styles.cardHeader}>
+        <View style={styles.headerBadges}>
+          {/* Category Chip */}
+          <View
+            style={[
+              styles.categoryChip,
+              {
+                backgroundColor: categoryConf.bg,
+                borderColor: categoryConf.border,
+              },
+            ]}
+          >
+            <Feather name={categoryConf.icon} size={10} color={categoryConf.color} />
+            <Text style={[styles.categoryText, { color: categoryConf.color }]}>
+              {task.category || 'Personal'}
+            </Text>
+          </View>
+
+          {/* Priority Chip */}
+          <View
+            style={[
+              styles.priorityChip,
+              {
+                backgroundColor: priorityConf.bg,
+                borderColor: priorityConf.border,
+              },
+            ]}
+          >
+            <View
+              style={[styles.priorityDot, { backgroundColor: priorityConf.dot }]}
+            />
+            <Text style={[styles.priorityText, { color: priorityConf.text }]}>
+              {task.priority?.toUpperCase()}
+            </Text>
+          </View>
+        </View>
+
+        {/* Due Date Badge */}
+        {dueInfo ? (
+          <View
+            style={[
+              styles.dueBadge,
+              dueInfo.isOverdue && !isCompleted && styles.dueBadgeOverdue,
+              dueInfo.isToday && !isCompleted && styles.dueBadgeToday,
+            ]}
+          >
+            <Feather
+              name={dueInfo.isOverdue && !isCompleted ? 'alert-circle' : 'clock'}
+              size={11}
+              color={
+                dueInfo.isOverdue && !isCompleted
+                  ? colors.rose
+                  : dueInfo.isToday && !isCompleted
+                  ? colors.amber
+                  : colors.textSecondary
+              }
+            />
+            <Text
+              style={[
+                styles.dueText,
+                dueInfo.isOverdue && !isCompleted && styles.dueTextOverdue,
+                dueInfo.isToday && !isCompleted && styles.dueTextToday,
+              ]}
+            >
+              {dueInfo.text}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+
+      {/* Main Task Row: Checkbox, Title & Description, Action Icons */}
+      <View style={styles.mainRow}>
         <TouchableOpacity
           style={[styles.checkbox, isCompleted && styles.checkboxCompleted]}
           onPress={() => toggleTaskComplete(task)}
           activeOpacity={0.7}
         >
-          {isCompleted && <Feather name="check" size={12} color="#090d16" strokeWidth={3} />}
+          {isCompleted && (
+            <Feather name="check" size={13} color="#090d16" strokeWidth={3.5} />
+          )}
         </TouchableOpacity>
 
         <View style={styles.contentWrap}>
@@ -64,87 +139,24 @@ export const TaskItem = ({ task }) => {
           ) : null}
         </View>
 
-        {/* Edit & Delete actions */}
+        {/* Action Buttons */}
         <View style={styles.actions}>
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={() => openEditModal(task)}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Feather name="edit-2" size={14} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.actionBtn}
+            style={[styles.actionBtn, styles.deleteBtn]}
             onPress={() => openDeleteModal(task._id)}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Feather name="trash-2" size={14} color={colors.rose} />
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Footer: Priority & Due Date */}
-      <View style={styles.footer}>
-        <View style={styles.badgeRow}>
-          {/* Priority Chip */}
-          <View
-            style={[
-              styles.priorityChip,
-              { backgroundColor: priorityConf.bg, borderColor: priorityConf.border },
-            ]}
-          >
-            <View style={[styles.priorityDot, { backgroundColor: priorityConf.dot }]} />
-            <Text style={[styles.priorityText, { color: priorityConf.text }]}>
-              {task.priority?.toUpperCase()}
-            </Text>
-          </View>
-
-          {/* Status Chip */}
-          <View
-            style={[
-              styles.statusChip,
-              {
-                backgroundColor:
-                  task.status === 'completed'
-                    ? 'rgba(16, 185, 129, 0.12)'
-                    : task.status === 'in-progress'
-                    ? 'rgba(14, 165, 233, 0.12)'
-                    : 'rgba(148, 163, 184, 0.1)',
-              },
-            ]}
-          >
-            <Text style={styles.statusText}>
-              {task.status ? task.status.replace('-', ' ') : 'pending'}
-            </Text>
-          </View>
-        </View>
-
-        {/* Due Date */}
-        {dueInfo ? (
-          <View
-            style={[
-              styles.dueBadge,
-              dueInfo.isOverdue && !isCompleted && styles.dueBadgeOverdue,
-              dueInfo.isToday && !isCompleted && styles.dueBadgeToday,
-            ]}
-          >
-            {dueInfo.isOverdue && !isCompleted ? (
-              <Feather name="alert-circle" size={11} color={colors.rose} />
-            ) : (
-              <Feather name="clock" size={11} color={colors.textSecondary} />
-            )}
-            <Text
-              style={[
-                styles.dueText,
-                dueInfo.isOverdue && !isCompleted && styles.dueTextOverdue,
-                dueInfo.isToday && !isCompleted && styles.dueTextToday,
-              ]}
-            >
-              {dueInfo.text}
-            </Text>
-          </View>
-        ) : null}
       </View>
     </View>
   );
@@ -158,12 +170,92 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: 14,
     marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardCompleted: {
-    opacity: 0.65,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    opacity: 0.6,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
   },
-  topRow: {
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  headerBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  priorityChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  priorityDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
+  priorityText: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  dueBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 8,
+    backgroundColor: colors.surfaceLight,
+  },
+  dueBadgeOverdue: {
+    backgroundColor: 'rgba(244, 63, 94, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 63, 94, 0.3)',
+  },
+  dueBadgeToday: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+  },
+  dueText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  dueTextOverdue: {
+    color: colors.rose,
+    fontWeight: '700',
+  },
+  dueTextToday: {
+    color: colors.amber,
+    fontWeight: '700',
+  },
+  mainRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
@@ -208,87 +300,20 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginLeft: 4,
-  },
-  actionBtn: {
-    padding: 2,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 12,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 6,
   },
-  priorityChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  priorityDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-  },
-  priorityText: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
-  statusChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    textTransform: 'capitalize',
-  },
-  dueBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
+  actionBtn: {
+    width: 28,
+    height: 28,
     borderRadius: 8,
     backgroundColor: colors.surfaceLight,
-  },
-  dueBadgeOverdue: {
-    backgroundColor: 'rgba(244, 63, 94, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(244, 63, 94, 0.3)',
+    borderColor: colors.border,
   },
-  dueBadgeToday: {
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-  },
-  dueText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  dueTextOverdue: {
-    color: colors.rose,
-    fontWeight: '700',
-  },
-  dueTextToday: {
-    color: colors.amber,
-    fontWeight: '700',
+  deleteBtn: {
+    borderColor: 'rgba(244, 63, 94, 0.2)',
   },
 });
 

@@ -97,13 +97,13 @@ export const ServerConfigModal = () => {
               style={styles.presetBtn}
               onPress={() => setInputUrl(DEFAULT_API_URL)}
             >
-              <Text style={styles.presetText}>Local Wi-Fi (10.19.163.65)</Text>
+              <Text style={styles.presetText}>Cloud Atlas API (Default Render)</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.presetBtn}
               onPress={() => setInputUrl('http://10.0.2.2:5000/api')}
             >
-              <Text style={styles.presetText}>Android Emulator (10.0.2.2)</Text>
+              <Text style={styles.presetText}>Android Emulator (10.0.2.2:5000)</Text>
             </TouchableOpacity>
           </View>
 

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
-import taskApi, { initApiUrl, setStoredApiUrl, getStoredApiUrl } from '../api/taskApi';
+import taskApi, { setStoredApiUrl, getStoredApiUrl } from '../api/taskApi';
+import { useAuth } from './AuthContext';
 
 const TaskContext = createContext();
 
@@ -13,8 +14,10 @@ export const useTasks = () => {
 };
 
 export const TaskProvider = ({ children }) => {
+  const { isAuthenticated, token } = useAuth();
+
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [backendConnected, setBackendConnected] = useState(true);
   const [apiUrl, setApiUrl] = useState(getStoredApiUrl());
@@ -24,6 +27,8 @@ export const TaskProvider = ({ children }) => {
     search: '',
     status: 'all',
     priority: 'all',
+    category: 'all',
+    sortBy: 'createdAt',
   });
 
   // Modals
@@ -32,18 +37,16 @@ export const TaskProvider = ({ children }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingTaskId, setDeletingTaskId] = useState(null);
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
-
-  // Initialize API URL on start
-  useEffect(() => {
-    (async () => {
-      const url = await initApiUrl();
-      setApiUrl(url);
-    })();
-  }, []);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Fetch tasks
   const fetchTasks = useCallback(
     async (isPullRefresh = false) => {
+      if (!isAuthenticated) {
+        setTasks([]);
+        return;
+      }
+
       if (isPullRefresh) {
         setRefreshing(true);
       } else {
@@ -64,12 +67,16 @@ export const TaskProvider = ({ children }) => {
         setRefreshing(false);
       }
     },
-    [filters]
+    [isAuthenticated, filters]
   );
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    if (isAuthenticated) {
+      fetchTasks();
+    } else {
+      setTasks([]);
+    }
+  }, [isAuthenticated, fetchTasks]);
 
   // Add Task
   const addTask = async (taskData) => {
@@ -183,6 +190,9 @@ export const TaskProvider = ({ children }) => {
   const openServerModal = () => setIsServerModalOpen(true);
   const closeServerModal = () => setIsServerModalOpen(false);
 
+  const openProfileModal = () => setIsProfileModalOpen(true);
+  const closeProfileModal = () => setIsProfileModalOpen(false);
+
   // Computed stats
   const stats = useMemo(() => {
     const total = tasks.length;
@@ -216,6 +226,7 @@ export const TaskProvider = ({ children }) => {
     isDeleteModalOpen,
     deletingTaskId,
     isServerModalOpen,
+    isProfileModalOpen,
     fetchTasks,
     addTask,
     editTask,
@@ -229,7 +240,11 @@ export const TaskProvider = ({ children }) => {
     closeDeleteModal,
     openServerModal,
     closeServerModal,
+    openProfileModal,
+    closeProfileModal,
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
 };
+
+export default TaskContext;

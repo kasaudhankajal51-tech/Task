@@ -18,28 +18,46 @@ import TaskItem from '../components/TaskItem';
 import TaskModal from '../components/TaskModal';
 import DeleteModal from '../components/DeleteModal';
 import ServerConfigModal from '../components/ServerConfigModal';
+import ProfileModal from '../components/ProfileModal';
 
 export const HomeScreen = () => {
-  const { tasks, loading, refreshing, fetchTasks, openCreateModal, filters } = useTasks();
+  const {
+    tasks,
+    loading,
+    refreshing,
+    fetchTasks,
+    openCreateModal,
+    filters,
+    isProfileModalOpen,
+    closeProfileModal,
+  } = useTasks();
 
   const renderEmptyState = () => {
     if (loading) {
       return (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size="large" color={colors.teal} />
-          <Text style={styles.loadingText}>Syncing tasks with MongoDB Atlas...</Text>
+          <Text style={styles.loadingText}>Syncing your personal tasks...</Text>
         </View>
       );
     }
 
-    if (tasks.length === 0 && (filters.search || filters.status !== 'all' || filters.priority !== 'all')) {
+    if (
+      tasks.length === 0 &&
+      (filters.search ||
+        filters.status !== 'all' ||
+        filters.priority !== 'all' ||
+        filters.category !== 'all')
+    ) {
       return (
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconWrap}>
             <Feather name="search" size={28} color={colors.textMuted} />
           </View>
           <Text style={styles.emptyTitle}>No matching tasks</Text>
-          <Text style={styles.emptySubtitle}>Try changing your search query or filter tags.</Text>
+          <Text style={styles.emptySubtitle}>
+            Try changing your search keywords or filter pills.
+          </Text>
         </View>
       );
     }
@@ -50,9 +68,9 @@ export const HomeScreen = () => {
           <View style={[styles.emptyIconWrap, styles.emptyIconWrapSuccess]}>
             <Feather name="check-circle" size={32} color={colors.teal} />
           </View>
-          <Text style={styles.emptyTitle}>All caught up!</Text>
+          <Text style={styles.emptyTitle}>Your Workspace is Clear!</Text>
           <Text style={styles.emptySubtitle}>
-            No tasks in this workspace. Tap the "+" button below to add your first task.
+            No tasks in your personal list. Tap the "+" button below to add your first task.
           </Text>
         </View>
       );
@@ -66,7 +84,7 @@ export const HomeScreen = () => {
       {/* Top Header */}
       <Header />
 
-      {/* Main Content List */}
+      {/* Main Task List */}
       <FlatList
         data={tasks}
         keyExtractor={(item) => item._id}
@@ -103,6 +121,10 @@ export const HomeScreen = () => {
       <TaskModal />
       <DeleteModal />
       <ServerConfigModal />
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={closeProfileModal}
+      />
     </View>
   );
 };

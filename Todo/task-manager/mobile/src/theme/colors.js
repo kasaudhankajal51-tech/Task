@@ -3,12 +3,14 @@ export const colors = {
   background: '#090d16',
   surface: '#0f172a',
   surfaceLight: '#1e293b',
+  surfaceCard: 'rgba(30, 41, 59, 0.7)',
   surfaceHover: '#334155',
 
   // Borders
   border: 'rgba(255, 255, 255, 0.08)',
   borderLight: 'rgba(255, 255, 255, 0.15)',
   borderFocused: '#14b8a6',
+  borderGlow: 'rgba(20, 184, 166, 0.35)',
 
   // Text
   textPrimary: '#f8fafc',
@@ -22,8 +24,57 @@ export const colors = {
   tealLight: '#2dd4bf',
   emerald: '#10b981',
   indigo: '#6366f1',
+  indigoLight: '#818cf8',
   amber: '#f59e0b',
   rose: '#f43f5e',
+  purple: '#a855f7',
+  cyan: '#06b6d4',
+
+  // Category Colors
+  categories: {
+    Work: {
+      color: '#6366f1',
+      bg: 'rgba(99, 102, 241, 0.14)',
+      border: 'rgba(99, 102, 241, 0.3)',
+      icon: 'briefcase',
+    },
+    Personal: {
+      color: '#14b8a6',
+      bg: 'rgba(20, 184, 166, 0.14)',
+      border: 'rgba(20, 184, 166, 0.3)',
+      icon: 'user',
+    },
+    Urgent: {
+      color: '#f43f5e',
+      bg: 'rgba(244, 63, 94, 0.14)',
+      border: 'rgba(244, 63, 94, 0.3)',
+      icon: 'zap',
+    },
+    Study: {
+      color: '#a855f7',
+      bg: 'rgba(168, 85, 247, 0.14)',
+      border: 'rgba(168, 85, 247, 0.3)',
+      icon: 'book-open',
+    },
+    Finance: {
+      color: '#10b981',
+      bg: 'rgba(16, 185, 129, 0.14)',
+      border: 'rgba(16, 185, 129, 0.3)',
+      icon: 'dollar-sign',
+    },
+    Health: {
+      color: '#f59e0b',
+      bg: 'rgba(245, 158, 11, 0.14)',
+      border: 'rgba(245, 158, 11, 0.3)',
+      icon: 'heart',
+    },
+    Other: {
+      color: '#94a3b8',
+      bg: 'rgba(148, 163, 184, 0.14)',
+      border: 'rgba(148, 163, 184, 0.3)',
+      icon: 'grid',
+    },
+  },
 
   // Priority Colors
   priority: {

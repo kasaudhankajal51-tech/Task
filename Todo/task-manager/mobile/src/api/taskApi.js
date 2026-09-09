@@ -2,21 +2,26 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const DEFAULT_API_URL = 'https://task-w1a5.onrender.com/api';
-const STORAGE_KEY = 'taskflow_mobile_api_url';
+const STORAGE_API_URL_KEY = 'taskflow_mobile_api_url';
+const STORAGE_TOKEN_KEY = 'taskflow_auth_token';
+const STORAGE_USER_KEY = 'taskflow_auth_user';
 
 let currentBaseUrl = DEFAULT_API_URL;
+let currentToken = null;
 
-// Initialize base URL from AsyncStorage
-export const initApiUrl = async () => {
+// Initialize base URL and Auth Token from AsyncStorage
+export const initApiConfig = async () => {
   try {
-    const saved = await AsyncStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      currentBaseUrl = saved;
-    }
+    const [savedUrl, savedToken] = await Promise.all([
+      AsyncStorage.getItem(STORAGE_API_URL_KEY),
+      AsyncStorage.getItem(STORAGE_TOKEN_KEY),
+    ]);
+    if (savedUrl) currentBaseUrl = savedUrl;
+    if (savedToken) currentToken = savedToken;
   } catch (e) {
-    console.warn('Failed to load saved API URL:', e);
+    console.warn('Failed to load saved API/Auth config:', e);
   }
-  return currentBaseUrl;
+  return { baseUrl: currentBaseUrl, token: currentToken };
 };
 
 export const getStoredApiUrl = () => currentBaseUrl;
@@ -24,7 +29,7 @@ export const getStoredApiUrl = () => currentBaseUrl;
 export const setStoredApiUrl = async (newUrl) => {
   try {
     const cleanUrl = newUrl.replace(/\/+$/, '');
-    await AsyncStorage.setItem(STORAGE_KEY, cleanUrl);
+    await AsyncStorage.setItem(STORAGE_API_URL_KEY, cleanUrl);
     currentBaseUrl = cleanUrl;
     return true;
   } catch (e) {
@@ -33,21 +38,95 @@ export const setStoredApiUrl = async (newUrl) => {
   }
 };
 
-const createClient = () => {
-  return axios.create({
-    baseURL: `${currentBaseUrl}/tasks`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    timeout: 8000,
-  });
+// Token helpers
+export const getAuthToken = () => currentToken;
+
+export const setAuthToken = async (token) => {
+  try {
+    currentToken = token;
+    if (token) {
+      await AsyncStorage.setItem(STORAGE_TOKEN_KEY, token);
+    } else {
+      await AsyncStorage.removeItem(STORAGE_TOKEN_KEY);
+    }
+  } catch (e) {
+    console.error('Failed to store auth token:', e);
+  }
 };
 
+export const getStoredUser = async () => {
+  try {
+    const userStr = await AsyncStorage.getItem(STORAGE_USER_KEY);
+    return userStr ? JSON.parse(userStr) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+export const setStoredUser = async (user) => {
+  try {
+    if (user) {
+      await AsyncStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user));
+    } else {
+      await AsyncStorage.removeItem(STORAGE_USER_KEY);
+    }
+  } catch (e) {
+    console.error('Failed to store user profile:', e);
+  }
+};
+
+// Axios Client with dynamic base URL & Authorization Header
+const createClient = (endpoint = '/tasks') => {
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+
+  if (currentToken) {
+    headers['Authorization'] = `Bearer ${currentToken}`;
+  }
+
+  const client = axios.create({
+    baseURL: `${currentBaseUrl}${endpoint}`,
+    headers,
+    timeout: 10000,
+  });
+
+  return client;
+};
+
+// Auth API Methods
+export const authApi = {
+  register: async (name, email, password) => {
+    const client = createClient('/auth');
+    const res = await client.post('/register', { name, email, password });
+    return res.data;
+  },
+
+  login: async (email, password) => {
+    const client = createClient('/auth');
+    const res = await client.post('/login', { email, password });
+    return res.data;
+  },
+
+  getMe: async () => {
+    const client = createClient('/auth');
+    const res = await client.get('/me');
+    return res.data;
+  },
+
+  updateProfile: async (data) => {
+    const client = createClient('/auth');
+    const res = await client.put('/profile', data);
+    return res.data;
+  },
+};
+
+// Tasks API Methods
 export const taskApi = {
   // Test connection to any given URL
   testConnection: async (urlToTest) => {
     try {
-      const url = urlToTest ? `${urlToTest.replace(/\/+$/, '')}/tasks` : `${currentBaseUrl}/tasks`;
+      const url = urlToTest ? `${urlToTest.replace(/\/+$/, '')}/` : `${currentBaseUrl}/`;
       const res = await axios.get(url, { timeout: 4000 });
       return res.status === 200;
     } catch (e) {
@@ -59,33 +138,45 @@ export const taskApi = {
   getTasks: async (params = {}) => {
     const cleanParams = {};
     Object.keys(params).forEach((k) => {
-      if (params[k] !== '' && params[k] !== null && params[k] !== undefined && params[k] !== 'all') {
+      if (
+        params[k] !== '' &&
+        params[k] !== null &&
+        params[k] !== undefined &&
+        params[k] !== 'all'
+      ) {
         cleanParams[k] = params[k];
       }
     });
-    const client = createClient();
+    const client = createClient('/tasks');
     const res = await client.get('/', { params: cleanParams });
     return res.data;
   },
 
   // Create a new task
   createTask: async (taskData) => {
-    const client = createClient();
+    const client = createClient('/tasks');
     const res = await client.post('/', taskData);
     return res.data;
   },
 
   // Update existing task
   updateTask: async (id, taskData) => {
-    const client = createClient();
+    const client = createClient('/tasks');
     const res = await client.put(`/${id}`, taskData);
     return res.data;
   },
 
   // Delete a task
   deleteTask: async (id) => {
-    const client = createClient();
+    const client = createClient('/tasks');
     const res = await client.delete(`/${id}`);
+    return res.data;
+  },
+
+  // Get productivity stats
+  getStats: async () => {
+    const client = createClient('/tasks');
+    const res = await client.get('/stats/summary');
     return res.data;
   },
 };
