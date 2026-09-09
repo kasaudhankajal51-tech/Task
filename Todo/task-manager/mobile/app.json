@@ -11,6 +11,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.taskflow.app",
       "adaptiveIcon": {
         "backgroundColor": "#090d16"
       }
