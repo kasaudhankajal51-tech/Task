@@ -278,6 +278,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 14,
+    maxWidth: 460,
+    width: '100%',
+    alignSelf: 'center',
   },
   badgePill: {
     flexDirection: 'row',
@@ -314,6 +317,9 @@ const styles = StyleSheet.create({
   heroSection: {
     alignItems: 'center',
     marginVertical: 20,
+    maxWidth: 460,
+    width: '100%',
+    alignSelf: 'center',
   },
   logoBadge: {
     width: 68,
@@ -353,6 +359,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     paddingHorizontal: 16,
     lineHeight: 18,
+    maxWidth: 340,
   },
   authCard: {
     backgroundColor: colors.surface,
@@ -360,6 +367,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: 20,
+    maxWidth: 460,
+    width: '100%',
+    alignSelf: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.4,

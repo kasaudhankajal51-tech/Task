@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    width: '100%',
   },
   profileBtn: {
     flexDirection: 'row',

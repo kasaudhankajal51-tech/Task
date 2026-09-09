@@ -135,14 +135,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   listContent: {
-    paddingBottom: 90,
+    paddingBottom: 100,
     paddingHorizontal: 16,
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 50,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   emptyIconWrap: {
     width: 64,
@@ -169,7 +172,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 6,
-    lineHeight: 17,
+    lineHeight: 18,
+    maxWidth: 320,
   },
   loadingText: {
     fontSize: 12,
