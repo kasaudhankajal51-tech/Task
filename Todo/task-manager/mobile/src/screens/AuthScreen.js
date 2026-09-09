@@ -11,7 +11,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
 import ServerConfigModal from '../components/ServerConfigModal';
@@ -51,21 +51,6 @@ export const AuthScreen = () => {
     }
   };
 
-  // Fast One-Tap Demo Login
-  const handleQuickDemo = async (userNumber) => {
-    const demoEmail = `user${userNumber}@taskflow.demo`;
-    const demoPass = 'taskflow123';
-    const demoName = `Phone ${userNumber} User`;
-
-    setAuthError(null);
-    // Try login first
-    const res = await login(demoEmail, demoPass);
-    if (!res.success) {
-      // If demo account doesn't exist, create it automatically
-      await register(demoName, demoEmail, demoPass);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -101,14 +86,14 @@ export const AuthScreen = () => {
               Task<Text style={styles.brandHighlight}>Flow</Text>
             </Text>
             <Text style={styles.brandSubtitle}>
-              Personalized Multi-Device Task Suite
+              Personalized Multi-User Task Suite
             </Text>
             <Text style={styles.brandTagline}>
-              Har user ka apna private workspace. Kisi ka data mix nahi hoga.
+              Har user ka apna private workspace. Aapka data 100% private rahega.
             </Text>
           </View>
 
-          {/* Card Container */}
+          {/* Auth Card Container */}
           <View style={styles.authCard}>
             {/* Mode Toggle Switch */}
             <View style={styles.tabContainer}>
@@ -157,11 +142,11 @@ export const AuthScreen = () => {
               </View>
             ) : null}
 
-            {/* Input Fields */}
+            {/* Input Form */}
             <View style={styles.form}>
               {isRegisterMode ? (
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>FULL NAME</Text>
+                  <Text style={styles.inputLabel}>YOUR FULL NAME</Text>
                   <View style={styles.inputWrapper}>
                     <Feather
                       name="user"
@@ -256,34 +241,12 @@ export const AuthScreen = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Divider */}
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>QUICK DEMO ACCOUNTS</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Quick Demo Logins for fast testing across multiple phones */}
-            <View style={styles.demoRow}>
-              <TouchableOpacity
-                style={styles.demoBtn}
-                onPress={() => handleQuickDemo(1)}
-                disabled={isLoading}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.demoDot, { backgroundColor: colors.teal }]} />
-                <Text style={styles.demoBtnText}>Phone 1 (User 1)</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.demoBtn}
-                onPress={() => handleQuickDemo(2)}
-                disabled={isLoading}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.demoDot, { backgroundColor: colors.indigo }]} />
-                <Text style={styles.demoBtnText}>Phone 2 (User 2)</Text>
-              </TouchableOpacity>
+            {/* Privacy note */}
+            <View style={styles.privacyNote}>
+              <Feather name="shield" size={13} color={colors.teal} />
+              <Text style={styles.privacyText}>
+                Your tasks are encrypted and strictly visible only to your account.
+              </Text>
             </View>
           </View>
         </ScrollView>
@@ -350,7 +313,7 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: 'center',
-    marginVertical: 18,
+    marginVertical: 20,
   },
   logoBadge: {
     width: 68,
@@ -510,48 +473,21 @@ const styles = StyleSheet.create({
     color: '#090d16',
     letterSpacing: -0.2,
   },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-    gap: 10,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: colors.textMuted,
-    letterSpacing: 0.8,
-  },
-  demoRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  demoBtn: {
-    flex: 1,
+  privacyNote: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: colors.surfaceLight,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingVertical: 10,
+    marginTop: 18,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
-  demoDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-  },
-  demoBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textPrimary,
+  privacyText: {
+    fontSize: 11,
+    color: colors.textMuted,
+    textAlign: 'center',
+    flex: 1,
   },
 });
 
