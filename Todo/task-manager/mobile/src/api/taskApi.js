@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const DEFAULT_API_URL = 'http://10.19.163.65:5000/api';
+export const DEFAULT_API_URL = 'https://task-w1a5.onrender.com/api';
 const STORAGE_KEY = 'taskflow_mobile_api_url';
 
 let currentBaseUrl = DEFAULT_API_URL;
