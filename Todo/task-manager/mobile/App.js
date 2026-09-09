@@ -23,11 +23,7 @@ const NavigationRoot = () => {
     return <AuthScreen />;
   }
 
-  return (
-    <TaskProvider>
-      <HomeScreen />
-    </TaskProvider>
-  );
+  return <HomeScreen />;
 };
 
 export default function App() {
@@ -36,7 +32,9 @@ export default function App() {
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <StatusBar style="light" backgroundColor={colors.surface} />
         <AuthProvider>
-          <NavigationRoot />
+          <TaskProvider>
+            <NavigationRoot />
+          </TaskProvider>
         </AuthProvider>
       </SafeAreaView>
     </SafeAreaProvider>

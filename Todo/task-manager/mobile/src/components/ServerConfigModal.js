@@ -13,8 +13,12 @@ import colors from '../theme/colors';
 import { useTasks } from '../context/TaskContext';
 import taskApi, { DEFAULT_API_URL } from '../api/taskApi';
 
-export const ServerConfigModal = () => {
+export const ServerConfigModal = ({ isOpen, onClose }) => {
   const { isServerModalOpen, closeServerModal, apiUrl, updateApiUrl } = useTasks();
+  
+  const modalVisible = isOpen !== undefined ? isOpen : isServerModalOpen;
+  const handleClose = onClose || closeServerModal;
+
   const [inputUrl, setInputUrl] = useState(apiUrl);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null); // 'success' | 'error' | null
@@ -22,9 +26,9 @@ export const ServerConfigModal = () => {
   useEffect(() => {
     setInputUrl(apiUrl);
     setTestResult(null);
-  }, [apiUrl, isServerModalOpen]);
+  }, [apiUrl, modalVisible]);
 
-  if (!isServerModalOpen) return null;
+  if (!modalVisible) return null;
 
   const handleTest = async () => {
     setTesting(true);
@@ -36,14 +40,15 @@ export const ServerConfigModal = () => {
 
   const handleSave = () => {
     updateApiUrl(inputUrl);
+    if (onClose) onClose();
   };
 
   return (
     <Modal
-      visible={isServerModalOpen}
+      visible={modalVisible}
       animationType="fade"
       transparent={true}
-      onRequestClose={closeServerModal}
+      onRequestClose={handleClose}
     >
       <View style={styles.backdrop}>
         <View style={styles.card}>
@@ -52,7 +57,7 @@ export const ServerConfigModal = () => {
               <Feather name="server" size={18} color={colors.teal} />
               <Text style={styles.title}>Backend API Server</Text>
             </View>
-            <TouchableOpacity onPress={closeServerModal}>
+            <TouchableOpacity onPress={handleClose}>
               <Feather name="x" size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
