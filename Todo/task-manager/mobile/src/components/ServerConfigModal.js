@@ -8,16 +8,16 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { useTasks } from '../context/TaskContext';
-import taskApi, { DEFAULT_API_URL } from '../api/taskApi';
+import taskApi, { DEFAULT_API_URL, getStoredApiUrl, setStoredApiUrl } from '../api/taskApi';
 
 export const ServerConfigModal = ({ isOpen, onClose }) => {
   const taskCtx = useTasks();
   const isServerModalOpen = taskCtx?.isServerModalOpen;
   const closeServerModal = taskCtx?.closeServerModal;
-  const apiUrl = taskCtx?.apiUrl || getStoredApiUrl();
+  const apiUrl = taskCtx?.apiUrl || (typeof getStoredApiUrl === 'function' ? getStoredApiUrl() : DEFAULT_API_URL);
   const updateApiUrl = taskCtx?.updateApiUrl || setStoredApiUrl;
   
   const modalVisible = isOpen !== undefined ? isOpen : !!isServerModalOpen;

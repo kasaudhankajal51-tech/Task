@@ -11,7 +11,7 @@ export const useTasks = () => {
 };
 
 export const TaskProvider = ({ children }) => {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
