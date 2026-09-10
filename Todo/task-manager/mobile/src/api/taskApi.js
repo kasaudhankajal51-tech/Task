@@ -88,7 +88,7 @@ const createClient = (endpoint = '/tasks') => {
   const client = axios.create({
     baseURL: `${currentBaseUrl}${endpoint}`,
     headers,
-    timeout: 10000,
+    timeout: 35000,
   });
 
   return client;
@@ -127,15 +127,18 @@ export const taskApi = {
   testConnection: async (urlToTest) => {
     try {
       const baseUrl = urlToTest ? urlToTest.replace(/\/+$/, '') : currentBaseUrl.replace(/\/+$/, '');
-      // Try root or /health with 10s timeout
-      const res = await axios.get(baseUrl, { timeout: 10000 });
-      return res.status < 400;
+      // Try root or /health with 40s timeout (handles Render cold-starts)
+      const res = await axios.get(baseUrl, { timeout: 40000 });
+      return { ok: res.status < 400, message: 'Successfully connected to backend!' };
     } catch (e) {
       if (e.response && e.response.status < 500) {
         // Server responded (even with 401/404), meaning it is alive!
-        return true;
+        return { ok: true, message: 'Successfully connected to backend!' };
       }
-      return false;
+      if (e.code === 'ECONNABORTED' || e.message?.toLowerCase().includes('timeout')) {
+        return { ok: false, message: 'Connection timed out. Render server might still be waking up — please retry in a few seconds.' };
+      }
+      return { ok: false, message: 'Cannot connect to this URL. Check internet or server status.' };
     }
   },
 

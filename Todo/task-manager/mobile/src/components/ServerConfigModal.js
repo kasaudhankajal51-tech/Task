@@ -37,9 +37,9 @@ export const ServerConfigModal = ({ isOpen, onClose }) => {
   const handleTest = async () => {
     setTesting(true);
     setTestResult(null);
-    const ok = await taskApi.testConnection(inputUrl);
+    const res = await taskApi.testConnection(inputUrl);
     setTesting(false);
-    setTestResult(ok ? 'success' : 'error');
+    setTestResult(res);
   };
 
   const handleSave = () => {
@@ -86,17 +86,17 @@ export const ServerConfigModal = ({ isOpen, onClose }) => {
           />
 
           {/* Test connection result */}
-          {testResult === 'success' && (
+          {testResult && testResult.ok && (
             <View style={styles.resultSuccess}>
               <Feather name="check-circle" size={14} color={colors.emerald} />
-              <Text style={styles.resultTextSuccess}>Successfully connected to backend!</Text>
+              <Text style={styles.resultTextSuccess}>{testResult.message || 'Successfully connected to backend!'}</Text>
             </View>
           )}
 
-          {testResult === 'error' && (
+          {testResult && !testResult.ok && (
             <View style={styles.resultError}>
               <Feather name="alert-circle" size={14} color={colors.rose} />
-              <Text style={styles.resultTextError}>Cannot connect to this URL</Text>
+              <Text style={styles.resultTextError}>{testResult.message || 'Cannot connect to this URL'}</Text>
             </View>
           )}
 
@@ -107,6 +107,12 @@ export const ServerConfigModal = ({ isOpen, onClose }) => {
               onPress={() => setInputUrl(DEFAULT_API_URL)}
             >
               <Text style={styles.presetText}>Cloud Atlas API (Default Render)</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.presetBtn}
+              onPress={() => setInputUrl('http://10.19.163.65:5000/api')}
+            >
+              <Text style={styles.presetText}>Local Computer Wi-Fi (10.19.163.65:5000)</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.presetBtn}

@@ -1,7 +1,10 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, LogBox } from 'react-native';
+
+// Ignore harmless Expo CLI disconnected LogBox warning
+LogBox.ignoreLogs(['Cannot connect to Expo CLI']);
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { TaskProvider } from './src/context/TaskContext';
 import HomeScreen from './src/screens/HomeScreen';
